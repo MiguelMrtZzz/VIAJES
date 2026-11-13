@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#102b3f" />
+  <title>Control de traslados | A5 → Aldea 1</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root{--navy:#102b3f;--navy2:#173d55;--teal:#12a89a;--teal2:#dff7f3;--ink:#172b3a;--muted:#6b7d89;--line:#dce5ea;--bg:#f3f6f8;--white:#fff;--green:#17865b;--greenbg:#e6f6ee;--amber:#a96509;--amberbg:#fff3df;--red:#b54747;--redbg:#ffeded;--blue:#2f6fa5;--bluebg:#eaf3fb;--shadow:0 8px 24px rgba(16,43,63,.07)}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--ink)}
+    .top{background:linear-gradient(115deg,var(--navy),var(--navy2));color:white;padding:28px max(22px,calc((100vw - 1200px)/2)) 30px}
+    .toprow{max-width:1200px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .brand{display:flex;align-items:center;gap:13px}.brandmark{width:45px;height:45px;border-radius:13px;background:var(--teal);display:grid;place-items:center;font-weight:900;color:white;letter-spacing:-1px}.eyebrow{font-size:11px;letter-spacing:1.7px;text-transform:uppercase;color:#a9c4d2;font-weight:700}.top h1{margin:4px 0 5px;font-size:clamp(23px,3vw,32px);letter-spacing:-.7px}.top p{margin:0;color:#c5d5df;font-size:14px}.topnote{border:1px solid #466174;background:#1a4058;border-radius:12px;padding:10px 14px;font-size:12px;color:#d7e5ec;white-space:nowrap}
+    main{max-width:1200px;margin:24px auto 55px;padding:0 20px}.section-title{font-size:16px;font-weight:800;margin:0 0 12px;letter-spacing:-.2px}.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.upload-card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:17px;box-shadow:var(--shadow)}.upload-head{display:flex;align-items:center;gap:12px;margin-bottom:13px}.file-icon{width:38px;height:38px;border-radius:11px;background:#e8f3f8;color:var(--blue);display:grid;place-items:center;font-weight:800;font-size:12px}.upload-head strong{display:block;font-size:14px}.upload-head small{display:block;color:var(--muted);margin-top:3px;font-size:12px}.file-input{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px dashed #b8c8d1;border-radius:11px;padding:11px 12px;background:#f9fbfc}.file-name{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.file-input input{max-width:155px;font-size:12px;color:var(--muted)}
+    .actions{display:flex;align-items:center;gap:12px;margin:15px 0 22px;flex-wrap:wrap}.btn{border:0;border-radius:10px;padding:12px 17px;font-size:13px;font-weight:800;cursor:pointer;transition:.15s}.btn-primary{background:var(--teal);color:white;box-shadow:0 5px 13px rgba(18,168,154,.18)}.btn-primary:hover{background:#0b9387;transform:translateY(-1px)}.btn-primary:disabled{opacity:.45;cursor:not-allowed;transform:none}.btn-light{background:white;border:1px solid var(--line);color:var(--navy)}.statusline{font-size:12px;color:var(--muted)}.error{display:none;background:var(--redbg);border:1px solid #f2caca;color:var(--red);padding:12px 14px;border-radius:10px;font-size:13px;margin:0 0 18px}
+    .dashboard{display:none}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin:0 0 24px}.kpi{background:white;border:1px solid var(--line);border-radius:15px;padding:17px 18px;box-shadow:var(--shadow)}.kpi-label{font-size:12px;color:var(--muted);font-weight:600}.kpi-value{font-size:29px;font-weight:850;letter-spacing:-1px;margin:7px 0 3px;color:var(--navy);font-variant-numeric:tabular-nums}.kpi-sub{font-size:11px;color:#81919b}
+    .panel{background:white;border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);margin-bottom:18px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}.panel-head h2{font-size:16px;margin:0}.panel-head p{font-size:11px;color:var(--muted);margin:4px 0 0}.ps-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:11px}.ps-card{border:1px solid var(--line);border-radius:13px;padding:13px;background:#fbfcfd;min-width:0}.ps-top{display:flex;justify-content:space-between;align-items:center;gap:6px}.ps-name{font-size:13px;font-weight:850;color:var(--navy)}.ps-count{font-size:18px;font-weight:850;font-variant-numeric:tabular-nums}.ps-count span{font-size:11px;color:var(--muted);font-weight:600}.progress{height:7px;background:#e8eef1;border-radius:20px;overflow:hidden;margin:10px 0 8px}.progress>i{height:100%;display:block;background:var(--teal);border-radius:20px}.ps-foot{display:flex;justify-content:space-between;gap:5px;font-size:10px;color:var(--muted)}.ps-status{font-size:10px;font-weight:800;padding:4px 7px;border-radius:20px;background:var(--bluebg);color:var(--blue);white-space:nowrap}.ps-status.ready{background:var(--greenbg);color:var(--green)}
+    .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:13px;font-size:11px;color:var(--muted)}.legend span{display:flex;align-items:center;gap:6px}.dot{width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--teal)}
+    .filters{display:grid;grid-template-columns:1.5fr 1fr 1fr auto;gap:9px;margin-bottom:13px}.filters input,.filters select{width:100%;border:1px solid var(--line);border-radius:9px;padding:10px 11px;font:inherit;font-size:12px;background:#fff;color:var(--ink);outline:none}.filters input:focus,.filters select:focus{border-color:var(--teal);box-shadow:0 0 0 3px #dff7f3}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:11px}table{width:100%;border-collapse:collapse;min-width:820px}thead{background:#f5f8fa}th{text-align:left;font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:#637785;padding:11px 12px;white-space:nowrap}td{padding:11px 12px;border-top:1px solid #edf1f3;font-size:12px;vertical-align:middle}tbody tr:hover{background:#f9fcfc}.lpn{font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums}.subcell{display:block;color:var(--muted);font-size:10px;margin-top:3px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pill{display:inline-flex;align-items:center;padding:5px 8px;border-radius:30px;font-size:10px;font-weight:800;white-space:nowrap}.pill.ps{background:var(--bluebg);color:var(--blue)}.pill.sent{background:var(--greenbg);color:var(--green)}.pill.pending{background:var(--amberbg);color:var(--amber)}.pill.other{background:#eef0f3;color:#5e6a73}.pill.review{background:var(--redbg);color:var(--red)}.empty{padding:26px;text-align:center;color:var(--muted);font-size:12px}.table-foot{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:11px;font-size:11px;color:var(--muted)}
+
+    .trip-area{margin-top:18px}.trip-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.trip-card{border:1px solid var(--line);border-radius:13px;padding:14px;background:#fff;min-width:0}.trip-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.trip-title{font-size:13px;font-weight:850;color:var(--navy)}.trip-sub{font-size:11px;color:var(--muted);margin-top:4px}.trip-stats{display:flex;gap:14px;flex-wrap:wrap;margin:12px 0;font-size:11px;color:var(--muted)}.trip-stats strong{color:var(--ink)}.trip-actions{display:flex;align-items:center;justify-content:space-between;gap:10px}.trip-actions .btn{padding:9px 12px;font-size:11px}.trip-status{font-size:10px;font-weight:800;padding:5px 8px;border-radius:20px;white-space:nowrap;background:var(--amberbg);color:var(--amber)}.trip-status.done{background:var(--greenbg);color:var(--green)}.trip-status.ready{background:var(--bluebg);color:var(--blue)}.trip-status.partial{background:var(--redbg);color:var(--red)}.trip-empty{grid-column:1/-1;padding:22px;border:1px dashed #cbd7dd;border-radius:12px;color:var(--muted);font-size:12px;text-align:center;background:#fbfcfd}.charts-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.chart-card{border:1px solid var(--line);border-radius:13px;padding:14px;background:#fff;min-width:0}.chart-card h3{font-size:13px;margin:0 0 4px;color:var(--navy)}.chart-card p{font-size:10px;color:var(--muted);margin:0 0 10px}.chart-wrap{height:255px;position:relative}.chart-wide{grid-column:1/-1}.chart-wide .chart-wrap{height:290px}.chart-fallback{font-size:12px;color:var(--muted);padding:18px;text-align:center}
+    .method{display:grid;grid-template-columns:1fr 1fr;gap:14px}.methodbox{background:#f8fafb;border:1px solid var(--line);border-radius:12px;padding:13px}.methodbox strong{font-size:12px;display:block;margin-bottom:5px}.methodbox p{font-size:11px;color:var(--muted);line-height:1.55;margin:0}.footer{text-align:center;color:#8a9aa4;font-size:11px;margin-top:25px}
+    @media(max-width:850px){.kpis{grid-template-columns:repeat(2,1fr)}.ps-grid{grid-template-columns:repeat(2,1fr)}.filters{grid-template-columns:1fr 1fr}.topnote{display:none}}
+    @media(max-width:560px){.trip-grid,.charts-grid{grid-template-columns:1fr}.chart-wide{grid-column:auto}.chart-wrap,.chart-wide .chart-wrap{height:235px}.top{padding:22px 17px}.toprow{align-items:flex-start}.brandmark{width:39px;height:39px}.top p{font-size:12px}main{padding:0 13px;margin-top:17px}.upload-grid{grid-template-columns:1fr}.kpis{gap:8px}.kpi{padding:13px}.kpi-value{font-size:24px}.ps-grid{grid-template-columns:1fr 1fr}.filters{grid-template-columns:1fr}.method{grid-template-columns:1fr}.panel{padding:13px}}
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="toprow">
+      <div class="brand">
+        <div class="brandmark">A5</div>
+        <div><div class="eyebrow">Panel operativo de almacén</div><h1>Control de traslados</h1><p>Seguimiento de paletas desde A5 hacia Aldea 1</p></div>
+      </div>
+      <div class="topnote">5 puntos PS · 10 paletas por viaje · reabasto adicional</div>
+    </div>
+  </header>
+  <main>
+    <section>
+      <h2 class="section-title">1. Cargar archivos de trabajo</h2>
+      <div class="upload-grid">
+        <div class="upload-card">
+          <div class="upload-head"><div class="file-icon">XLSX</div><div><strong>1. Archivo de traslados</strong><small>Lista de LPN que debes enviar a Aldea 1</small></div></div>
+          <div class="file-input"><span class="file-name" id="targetName">Ningún archivo seleccionado</span><input id="targetFile" type="file" accept=".xlsx,.xls,.csv" /></div>
+        </div>
+        <div class="upload-card">
+          <div class="upload-head"><div class="file-icon">MI</div><div><strong>2. Movimientos internos (MI)</strong><small>Historial de ubicaciones y despachos</small></div></div>
+          <div class="file-input"><span class="file-name" id="miName">Ningún archivo seleccionado</span><input id="miFile" type="file" accept=".xlsx,.xls,.csv" /></div>
+        </div>
+        <div class="upload-card">
+          <div class="upload-head"><div class="file-icon">SAL</div><div><strong>3. Archivo de saldo</strong><small>Relaciona cada LPN con sus cajas y unidades</small></div></div>
+          <div class="file-input"><span class="file-name" id="saldoName">Ningún archivo seleccionado</span><input id="saldoFile" type="file" accept=".xlsx,.xls,.csv" /></div>
+        </div>
+        <div class="upload-card">
+          <div class="upload-head"><div class="file-icon">REA</div><div><strong>4. Archivo de reabasto (opcional)</strong><small>Cárgalo solo cuando tengas reabasto; se procesa como viaje adicional</small></div></div>
+          <div class="file-input"><span class="file-name" id="reabastoName">Ningún archivo seleccionado</span><input id="reabastoFile" type="file" accept=".xlsx,.xls,.csv" /></div>
+        </div>
+      </div>
+      <div class="actions"><button class="btn btn-primary" id="processBtn" disabled>Procesar información</button><button class="btn btn-light" id="resetBtn">Limpiar</button><span class="statusline" id="loadStatus">Selecciona los tres archivos obligatorios: traslados, MI y saldo. El reabasto es opcional.</span></div>
+      <div class="error" id="errorBox"></div>
+    </section>
+
+    <section class="dashboard" id="dashboard">
+      <h2 class="section-title">2. Resumen de la operación</h2>
+      <div class="kpis">
+        <div class="kpi"><div class="kpi-label">Paletas programadas</div><div class="kpi-value" id="kTotal">0</div><div class="kpi-sub">Registros del archivo de traslados</div></div>
+        <div class="kpi"><div class="kpi-label">En puntos PS</div><div class="kpi-value" id="kPS">0</div><div class="kpi-sub">LPN ubicados actualmente en PS1–PS5</div></div>
+        <div class="kpi"><div class="kpi-label">Despachadas a Aldea 1</div><div class="kpi-value" id="kSent">0</div><div class="kpi-sub">Salida desde PS con cantidad actual destino = 0</div></div>
+        <div class="kpi"><div class="kpi-label">Pendientes de movimiento</div><div class="kpi-value" id="kPending">0</div><div class="kpi-sub">Sin movimiento MI identificado</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><div><h2>3. Estado de los puntos de preparación</h2><p>Cada punto equivale a un viaje de 10 paletas. Al cambiar de PS, el LPN se cuenta únicamente en su última ubicación.</p></div></div>
+        <div class="ps-grid" id="psGrid"></div>
+        <div class="legend"><span><i class="dot"></i> Paletas actualmente en la PS</span><span>Un viaje se completa al reunir 10 LPN en el mismo punto y confirmar su salida.</span></div>
+        <div class="trip-area">
+          <div class="panel-head"><div><h2>Detalle y descarga de cada viaje</h2><p>Descarga un Excel por viaje con PS, LPN, código, cantidad en cajas y unidades del archivo de saldo.</p></div></div>
+          <div class="trip-grid" id="tripGrid"><div class="trip-empty">Carga los cuatro archivos para generar los viajes.</div></div>
+        </div>
+        <div class="trip-area">
+          <div class="panel-head"><div><h2>Viaje adicional de reabasto</h2><p>Se calcula por separado con la hoja A5_A1 del archivo de reabasto. No se mezcla con los viajes normales de 10 paletas.</p></div></div>
+          <div class="trip-grid" id="reabastoGrid"><div class="trip-empty">Carga el archivo de reabasto para generar este viaje.</div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><div><h2>4. Gráficos de la operación</h2><p>Indicadores de traslados normales, unidades del saldo y reabasto adicional.</p></div></div>
+        <div class="charts-grid">
+          <div class="chart-card"><h3>Paletas actuales por PS</h3><p>Cuántos LPN siguen en cada punto de preparación.</p><div class="chart-wrap"><canvas id="chartPS"></canvas></div></div>
+          <div class="chart-card"><h3>Distribución por estado</h3><p>Participación de los LPN según su ubicación o situación.</p><div class="chart-wrap"><canvas id="chartStatus"></canvas></div></div>
+          <div class="chart-card"><h3>Viajes por punto de preparación</h3><p>Viajes despachados, en preparación y salidas parciales.</p><div class="chart-wrap"><canvas id="chartTrips"></canvas></div></div>
+          <div class="chart-card"><h3>Cajas actualmente en cada PS</h3><p>Suma de las cajas de los LPN que siguen en preparación.</p><div class="chart-wrap"><canvas id="chartBoxes"></canvas></div></div>
+          <div class="chart-card"><h3>Unidades actualmente en cada PS</h3><p>Unidades obtenidas al cruzar los LPN con el archivo de saldo.</p><div class="chart-wrap"><canvas id="chartUnits"></canvas></div></div>
+          <div class="chart-card chart-wide"><h3>Top 10 códigos por cajas en preparación</h3><p>Productos con mayor cantidad de cajas ubicadas actualmente en PS1–PS5.</p><div class="chart-wrap"><canvas id="chartTopCodes"></canvas></div></div>
+          <div class="chart-card"><h3>Reabasto: cajas por SKU</h3><p>Cajas adicionales indicadas en la hoja A5_A1.</p><div class="chart-wrap"><canvas id="chartReabastoBoxes"></canvas></div></div>
+          <div class="chart-card"><h3>Reabasto: unidades por SKU</h3><p>Unidades adicionales calculadas desde la columna Tomar.</p><div class="chart-wrap"><canvas id="chartReabastoUnits"></canvas></div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><div><h2>5. Seguimiento por LPN</h2><p>Se muestra una sola ubicación vigente por cada LPN.</p></div><button class="btn btn-light" id="exportBtn">Exportar CSV</button></div>
+        <div class="filters">
+          <input id="searchBox" type="search" placeholder="Buscar LPN, código o descripción..." />
+          <select id="statusFilter"><option value="all">Todos los estados</option><option value="ps">En preparación</option><option value="sent">Despachada</option><option value="pending">Pendiente de movimiento</option><option value="other">En otra ubicación</option><option value="review">Revisar</option></select>
+          <select id="psFilter"><option value="all">Todas las PS</option><option>A5.PS1</option><option>A5.PS2</option><option>A5.PS3</option><option>A5.PS4</option><option>A5.PS5</option></select>
+          <select id="pageSize"><option value="50">50 filas</option><option value="100">100 filas</option><option value="250">250 filas</option><option value="all">Todas</option></select>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>LPN</th><th>Código / producto</th><th>Ubicación original</th><th>Ubicación vigente</th><th>Unidades</th><th>Estado</th><th>Último movimiento</th></tr></thead><tbody id="tableBody"><tr><td colspan="6" class="empty">Carga los cuatro archivos para ver los resultados.</td></tr></tbody></table></div>
+        <div class="table-foot"><span id="tableCount">0 registros</span><span>El detalle se calcula por LPN; las unidades se cruzan con el archivo de saldo.</span></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><div><h2>6. Reglas de lectura aplicadas</h2><p>La página interpreta el historial MI con las reglas operativas acordadas.</p></div></div>
+        <div class="method">
+          <div class="methodbox"><strong>Movimiento entre PS</strong><p>Si un LPN pasa de A5.PS1 a A5.PS2, deja de contarse en PS1 y pasa a contarse en PS2. Siempre se toma el último movimiento válido del LPN.</p></div>
+          <div class="methodbox"><strong>Despacho a Aldea 1</strong><p>Se revisa la última ubicación registrada del LPN. Si su último destino es una PS y “Cant. Actual Destino” es 0, se considera despachado desde esa PS. Si es mayor que 0, sigue en preparación. Un destino “FALTA” se envía a revisión.</p></div>
+          <div class="methodbox"><strong>Control de viajes y descargas</strong><p>Los LPN se agrupan por el último punto PS al que ingresaron. Cada grupo de 10 forma un viaje; los grupos incompletos quedan identificados como preparación o salida parcial. Cada grupo puede descargarse en Excel.</p></div>
+          <div class="methodbox"><strong>Unidades por LPN</strong><p>Las unidades se buscan por LPN en el archivo de saldo: LPN en columna Y y Cant. UMS en columna H para el formato compartido. Si un LPN no aparece en ese archivo, el dato de unidades queda vacío para evitar cálculos inventados.</p></div>
+          <div class="methodbox"><strong>Viaje de reabasto</strong><p>La hoja A5_A1 del archivo Reabasto se procesa como un viaje adicional independiente. Se toman Origen, SKU, Cajas y Tomar (unidades); no se mezcla con los viajes de 10 paletas.</p></div>
+          <div class="methodbox"><strong>Archivos locales</strong><p>Los cuatro Excel se procesan dentro del navegador. No se envían a un servidor. Para actualizar, carga las cuatro versiones nuevas y vuelve a procesar.</p></div>
+        </div>
+      </div>
+      <div class="footer" id="footerInfo">Control de traslados A5 → Aldea 1</div>
+    </section>
+  </main>
+<script>
+(() => {
+  const PS_LIST = ['A5.PS1','A5.PS2','A5.PS3','A5.PS4','A5.PS5'];
+  const $ = id => document.getElementById(id);
+  let targetFile = null, miFile = null, saldoFile = null, reabastoFile = null, results = [], filtered = [], tripGroups = [], reabastoItems = [], reabastoTrip = null, charts = {};
+  const norm = v => String(v ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+  const clean = v => String(v ?? '').trim();
+  const number = v => { if (typeof v === 'number') return v; const s=String(v ?? '').replace(/,/g,'').trim(); const n=Number(s); return Number.isFinite(n)?n:0; };
+  const isPS = loc => PS_LIST.includes(clean(loc).toUpperCase());
+  const isMissing = loc => ['FALTA',''].includes(clean(loc).toUpperCase());
+  const setError = msg => { $('errorBox').textContent=msg; $('errorBox').style.display=msg?'block':'none'; };
+  const fileLabel = (id,file) => $(id).textContent = file ? file.name : 'Ningún archivo seleccionado';
+  function dateMs(v){
+    if(v instanceof Date) return v.getTime();
+    if(typeof v==='number' && v>10000) return Math.round((v-25569)*86400000);
+    if(v===null || v===undefined || v==='') return 0;
+    const d=new Date(v); return Number.isNaN(d.getTime())?0:d.getTime();
+  }
+  function fmtDate(v){ const ms=dateMs(v); if(!ms) return '—'; return new Intl.DateTimeFormat('es-PE',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(ms)); }
+  async function readWorkbook(file){
+    const buf=await file.arrayBuffer();
+    return XLSX.read(buf,{type:'array',cellDates:true});
+  }
+  function rowsFromSheet(wb,sheetName){
+    const ws=wb.Sheets[sheetName];
+    if(!ws) throw new Error(`No encuentro la hoja ${sheetName} en el archivo ${wb.Workbook?.Props?.Title||''}.`);
+    return XLSX.utils.sheet_to_json(ws,{header:1,defval:null,raw:true,blankrows:false,range:0});
+  }
+  async function readRows(file){
+    const wb=await readWorkbook(file);
+    return rowsFromSheet(wb,wb.SheetNames[0]);
+  }
+  async function readReabastoRows(file){
+    const wb=await readWorkbook(file);
+    let sheetName=wb.SheetNames.find(s=>norm(s).includes('a5'));
+    if(!sheetName){
+      for(const name of wb.SheetNames){
+        const rows=rowsFromSheet(wb,name), hi=findHeader(rows,'sku');
+        if(hi>=0){
+          const h=headerMap(rows[hi]);
+          if(h['origen']!==undefined && h['tomar']!==undefined){sheetName=name;break;}
+        }
+      }
+    }
+    if(!sheetName) throw new Error('No encontré la hoja A5_A1 (o una hoja con columnas SKU, Origen y Tomar) en el archivo de reabasto.');
+    return {sheetName,rows:rowsFromSheet(wb,sheetName)};
+  }
+  function headerMap(row){ const map={}; (row||[]).forEach((v,i)=>{if(v!==null && v!==undefined) map[norm(v)]=i;}); return map; }
+  function findHeader(rows,needle){ return rows.findIndex(r=>(r||[]).some(v=>norm(v).includes(needle))); }
+  function parseTarget(rows){
+    const hi=findHeader(rows,'lpn');
+    if(hi<0) throw new Error('No pude identificar la columna LPN en el archivo de traslados. Verifica que sea el archivo “Traslado A5-A1”.');
+    const h=headerMap(rows[hi]);
+    const idx=(name,fallback)=>h[norm(name)]!==undefined?h[norm(name)]:fallback;
+    const iLpn=idx('LPN',4), iCode=idx('Codigo',1), iDesc=idx('Descripcion',2), iLoc=idx('Ubicacion',3), iPallet=idx('Paletas',7), iBoxes=idx('Cajas',6), iExpiry=idx('FV',5);
+    const out=[];
+    for(let r=hi+1;r<rows.length;r++){
+      const row=rows[r]||[]; const lpn=clean(row[iLpn]); if(!lpn || norm(lpn)==='lpn') continue;
+      out.push({lpn,code:clean(row[iCode]),description:clean(row[iDesc]),origin:clean(row[iLoc]),pallets:number(row[iPallet])||1,boxes:number(row[iBoxes]),expiry:row[iExpiry]});
+    }
+    if(!out.length) throw new Error('El archivo de traslados no contiene LPN debajo de los encabezados.');
+    return out;
+  }
+  function excelColumnLetter(index){
+    let n=index+1, out='';
+    while(n>0){const rem=(n-1)%26;out=String.fromCharCode(65+rem)+out;n=Math.floor((n-1)/26);}
+    return out;
+  }
+  const compactHeader = v => norm(v).replace(/[^a-z0-9]/g,'');
+  function locateSaldoLpnHeader(rows){
+    const scan=Math.min(rows.length,50);
+    for(let r=0;r<scan;r++){
+      const row=rows[r]||[];
+      for(let c=0;c<row.length;c++){
+        const key=compactHeader(row[c]);
+        if(['lpn','codigolpn','numerolpn','nrolpn'].includes(key)){
+          return {row:r,col:c,inferred:false};
+        }
+      }
+    }
+    // Respaldo: identifica la columna por los valores LPN reales.
+    let best={col:-1,score:0};
+    const width=Math.max(0,...rows.slice(0,Math.min(rows.length,50)).map(r=>(r||[]).length));
+    for(let c=0;c<width;c++){
+      let score=0;
+      for(let r=0;r<rows.length;r++){
+        const value=clean((rows[r]||[])[c]).toUpperCase();
+        if(/^(LRE|LR)[A-Z0-9]{6,}$/.test(value)) score++;
+      }
+      if(score>best.score) best={col:c,score};
+    }
+    if(best.score>0) return {row:0,col:best.col,inferred:true};
+    return null;
+  }
+  function findSaldoColumn(headers, aliases, fuzzy){
+    const compact=headers.map(compactHeader);
+    for(const alias of aliases){
+      const i=compact.indexOf(alias);
+      if(i>=0) return i;
+    }
+    if(fuzzy){
+      const i=compact.findIndex(key=>fuzzy(key));
+      if(i>=0) return i;
+    }
+    return null;
+  }
+  function parseSaldo(rows){
+    const located=locateSaldoLpnHeader(rows);
+    if(!located) throw new Error('No pude reconocer la columna LPN del saldo. Verifica que hayas cargado el reporte de saldo.');
+    const hi=located.row, headers=rows[hi]||[];
+    const iLpn=located.col;
+
+    // Primero se buscan los nombres de encabezado, sin depender de mayúsculas,
+    // tildes, espacios o signos de puntuación.
+    let iUnits=findSaldoColumn(headers,
+      ['cantums','cantfinalums','cantidadums','unidades'],
+      key=>key.includes('cant')&&key.includes('ums'));
+
+    // Respaldo para el formato de ReportConsultasSaldo compartido:
+    // H = Cant. UMS, E = Cant. Final UMS.
+    // Se valida que la columna contenga datos numéricos antes de usarla.
+    const hasNumericData = col => {
+      let checked=0;
+      for(let r=hi+1;r<Math.min(rows.length,hi+21);r++){
+        const v=(rows[r]||[])[col];
+        if(v===null||v===undefined||String(v).trim()==='') continue;
+        const n=typeof v==='number'?v:Number(String(v).replace(/,/g,'').trim());
+        if(Number.isFinite(n)) checked++;
+      }
+      return checked>0;
+    };
+    if(iUnits===null || !hasNumericData(iUnits)){
+      if(hasNumericData(7)) iUnits=7;       // H: Cant. UMS
+      else if(hasNumericData(4)) iUnits=4;  // E: Cant. Final UMS
+    }
+    if(iUnits===null || !hasNumericData(iUnits)){
+      throw new Error('Encontré el LPN en la columna '+excelColumnLetter(iLpn)+', pero no pude leer unidades. En el formato de saldo esperado se utiliza H (Cant. UMS) o E (Cant. Final UMS).');
+    }
+
+    const iBoxes=findSaldoColumn(headers,['cantfinal','cantidad','cajas'],key=>key==='cantfinal'||key==='cantidad');
+    const iLocation=findSaldoColumn(headers,['ubicacion'],key=>key.includes('ubicacion'));
+    const iCode=findSaldoColumn(headers,['codarticulo','codigoarticulo','codigo'],key=>key.includes('cod')&&key.includes('articulo'));
+    const iDate=findSaldoColumn(headers,['fecha ultimomovimiento','fecha del ultimomovimiento','fecha'],key=>key.includes('fecha')&&key.includes('movimiento'));
+    const map=new Map();
+    for(let r=hi+1;r<rows.length;r++){
+      const row=rows[r]||[], lpn=clean(row[iLpn]).toUpperCase();
+      if(!lpn || ['LPN','CODIGO LPN','NUMERO LPN'].includes(norm(lpn).toUpperCase())) continue;
+      const rawUnits=row[iUnits], hasUnits=rawUnits!==null && rawUnits!==undefined && String(rawUnits).trim()!=='';
+      const rawBoxes=iBoxes===null?null:row[iBoxes];
+      const item={
+        units:hasUnits?number(rawUnits):null,
+        boxes:rawBoxes===null||rawBoxes===undefined||String(rawBoxes).trim()===''?null:number(rawBoxes),
+        location:iLocation===null?'':clean(row[iLocation]),
+        code:iCode===null?'':clean(row[iCode]),
+        date:iDate===null?null:row[iDate]
+      };
+      const old=map.get(lpn);
+      if(!old || dateMs(item.date)>=dateMs(old.date)) map.set(lpn,item);
+    }
+    if(!map.size) throw new Error('Reconocí la columna LPN ('+excelColumnLetter(iLpn)+'), pero no encontré registros debajo del encabezado.');
+    map._meta={
+      lpnColumn:excelColumnLetter(iLpn),
+      unitsColumn:excelColumnLetter(iUnits),
+      unitsHeader:clean(headers[iUnits])|| (iUnits===7?'Cant. UMS (columna H)':'Cant. Final UMS (columna E)'),
+      headerRow:hi+1,
+      inferred:located.inferred
+    };
+    return map;
+  }
+  function parseReabasto(rows){
+    const hi=findHeader(rows,'sku');
+    if(hi<0) throw new Error('No pude encontrar la columna SKU en la hoja A5_A1 del archivo de reabasto.');
+    const h=headerMap(rows[hi]);
+    const get=(keys,fallback)=>{for(const k of keys){if(h[norm(k)]!==undefined)return h[norm(k)];}return fallback;};
+    const iSku=get(['SKU','Cod. Articulo','Codigo'],null), iDesc=get(['Descripcion','Artículo','Articulo'],null);
+    const iOrigin=get(['Origen','Ubicacion Origen'],null), iBoxes=get(['Cajas','Cantidad'],null);
+    const iTake=get(['Tomar','Unidades','Cantidad a tomar'],null), iUnitsPerBox=get(['Und_X_Caja','Unidades por caja'],null);
+    const iUnitsPerPallet=get(['Und_X_Paleta','Unidades por paleta'],null), iHuella=get(['Huella'],null);
+    if(iSku===null || iOrigin===null || iBoxes===null) throw new Error('La hoja A5_A1 debe incluir SKU, Origen y Cajas.');
+    const out=[];
+    for(let r=hi+1;r<rows.length;r++){
+      const row=rows[r]||[], sku=clean(row[iSku]);
+      if(!sku) continue;
+      const boxes=number(row[iBoxes]), unitsPerBox=iUnitsPerBox===null?0:number(row[iUnitsPerBox]);
+      const take=iTake===null?null:number(row[iTake]);
+      const units=take!==null && take>0?take:boxes*unitsPerBox;
+      out.push({type:'VIAJE REABASTO',origin:iOrigin===null?'':clean(row[iOrigin]),lpn:'',code:sku,description:iDesc===null?'':clean(row[iDesc]),footprint:iHuella===null?'':clean(row[iHuella]),boxes,units,unitsPerBox,unitsPerPallet:iUnitsPerPallet===null?null:number(row[iUnitsPerPallet]),take});
+    }
+    if(!out.length) throw new Error('La hoja A5_A1 no contiene productos para el viaje de reabasto.');
+    return out;
+  }
+  function parseMI(rows){
+    // El MI exportado puede traer sus encabezados en una fila técnica r=0; si no aparecen, se usan las posiciones verificadas del archivo compartido.
+    const hi=findHeader(rows,'lpn destino');
+    let ix={date:3,type:1,action:2,origin:8,sourceLpn:9,destination:18,destLpn:19,currentDest:26,id:0};
+    let start=0;
+    if(hi>=0){
+      const h=headerMap(rows[hi]);
+      const get=(keys,fallback)=>{for(const k of keys){if(h[norm(k)]!==undefined)return h[norm(k)];}return fallback;};
+      ix={date:get(['Fecha'],3),type:get(['Tipo'],1),action:get(['Tipo Movimiento','Movimiento'],2),origin:get(['Ubicacion Origen','Ubicación Origen'],8),sourceLpn:get(['Lpn Origen'],9),destination:get(['Ubicacion Destino','Ubicación Destino'],18),destLpn:get(['Lpn Destino'],19),currentDest:get(['Cant. Actual Destino','Cantidad Actual Destino'],26),id:get(['MI'],0)};
+      start=hi+1;
+    }
+    const out=[];
+    for(let r=start;r<rows.length;r++){
+      const row=rows[r]||[]; if(!row.length) continue;
+      const type=clean(row[ix.type]).toUpperCase(), action=norm(row[ix.action]);
+      const origin=clean(row[ix.origin]), destination=clean(row[ix.destination]);
+      const sourceLpn=clean(row[ix.sourceLpn]), destLpn=clean(row[ix.destLpn]);
+      if(!sourceLpn && !destLpn) continue;
+      if(type!=='UB' && !action.includes('cambio de ubicacion')) continue;
+      const rawCurrentDest=row[ix.currentDest];
+      out.push({id:clean(row[ix.id]),date:row[ix.date],dateMs:dateMs(row[ix.date]),origin,sourceLpn,destination,destLpn,currentDest:number(rawCurrentDest),hasCurrentDest:rawCurrentDest!==null && rawCurrentDest!==undefined && String(rawCurrentDest).trim()!=='',type,action});
+    }
+    return out;
+  }
+  function resolveLpn(lpn, events){
+    // Sigue posibles cambios de LPN si el movimiento registra un LPN origen y otro destino.
+    const aliases=new Set([lpn]); let expanded=true;
+    while(expanded){ expanded=false; for(const e of events){ if((aliases.has(e.sourceLpn)||aliases.has(e.destLpn))){ if(e.sourceLpn&&!aliases.has(e.sourceLpn)){aliases.add(e.sourceLpn);expanded=true;} if(e.destLpn&&!aliases.has(e.destLpn)){aliases.add(e.destLpn);expanded=true;} } } }
+    const chain=events.filter(e=>aliases.has(e.sourceLpn)||aliases.has(e.destLpn)).sort((a,b)=>a.dateMs-b.dateMs || String(a.id).localeCompare(String(b.id)));
+    const last=chain[chain.length-1];
+    if(!last) return {status:'pending',statusText:'Pendiente de movimiento',location:'',lastDate:null,tripDate:null,dispatchPS:'',events:chain.length};
+
+    // Guarda la última PS a la que ingresó el LPN para asignarlo al viaje correcto.
+    let lastPSEntryDate=null, lastPSEntryPS='';
+    for(const e of chain){ if(isPS(e.destination)){ lastPSEntryDate=e.date; lastPSEntryPS=e.destination.toUpperCase(); } }
+    const loc=last.destination.toUpperCase();
+    const lastTripDate=lastPSEntryPS ? (lastPSEntryDate||last.date) : last.date;
+
+    // REGLA OPERATIVA: si el último registro deja al LPN en una PS y Cant. Actual Destino = 0,
+    // significa que ya salió de esa PS hacia Aldea 1. Si es mayor que 0, sigue en esa PS.
+    if(isPS(loc) && last.hasCurrentDest && last.currentDest===0){
+      return {status:'sent',statusText:`Despachada desde ${loc}`,location:`Despachada desde ${loc}`,lastDate:last.date,tripDate:lastTripDate,dispatchPS:loc,events:chain.length};
+    }
+    if(isPS(loc)) return {status:'ps',statusText:'En preparación',location:loc,lastDate:last.date,tripDate:lastTripDate,dispatchPS:'',events:chain.length};
+
+    // También reconoce un registro explícito de salida desde una PS hacia otra ubicación.
+    if(isPS(last.origin) && last.hasCurrentDest && last.currentDest===0 && !isMissing(loc)){
+      const originPS=last.origin.toUpperCase();
+      return {status:'sent',statusText:`Despachada desde ${originPS}`,location:`Despachada desde ${originPS}`,lastDate:last.date,tripDate:lastPSEntryPS===originPS?(lastPSEntryDate||last.date):last.date,dispatchPS:originPS,events:chain.length};
+    }
+    if(isPS(last.origin) && isMissing(loc) && last.hasCurrentDest && last.currentDest===0) return {status:'review',statusText:'Revisar: destino FALTA',location:'FALTA',lastDate:last.date,tripDate:null,dispatchPS:'',events:chain.length};
+    if(loc==='FALTA') return {status:'review',statusText:'Revisar: FALTA',location:'FALTA',lastDate:last.date,tripDate:null,dispatchPS:'',events:chain.length};
+    return {status:'other',statusText:'En otra ubicación',location:last.destination||last.origin,lastDate:last.date,tripDate:null,dispatchPS:'',events:chain.length};
+  }
+  function analyze(targets, events, saldoMap){
+    const byLpn=new Map();
+    for(const t of targets){
+      const state=resolveLpn(t.lpn,events), saldo=saldoMap.get(clean(t.lpn).toUpperCase());
+      byLpn.set(t.lpn,{...t,...state,units:saldo?saldo.units:null,saldoFound:!!saldo});
+    }
+    return [...byLpn.values()];
+  }
+  function buildTrips(){
+    const byPS=new Map(PS_LIST.map(ps=>[ps,[]]));
+    results.forEach((item,index)=>{
+      const ps=item.status==='ps'?item.location:(item.status==='sent'?item.dispatchPS:'');
+      if(!byPS.has(ps)) return;
+      byPS.get(ps).push({...item,_tripMs:dateMs(item.tripDate||item.lastDate),_order:index});
+    });
+    const trips=[];
+    for(const ps of PS_LIST){
+      const items=(byPS.get(ps)||[]).sort((a,b)=>a._tripMs-b._tripMs||a._order-b._order);
+      for(let i=0;i<items.length;i+=10){
+        const batch=items.slice(i,i+10), currentCount=batch.filter(x=>x.status==='ps').length, sentCount=batch.filter(x=>x.status==='sent').length;
+        let status='preparing', statusText='En preparación';
+        if(batch.length===10 && sentCount===10){status='done';statusText='Despachado';}
+        else if(batch.length===10 && currentCount===10){status='ready';statusText='Listo para despacho';}
+        else if(currentCount>0 && sentCount>0){status='active';statusText='Salida parcial / en proceso';}
+        else if(currentCount>0){status='preparing';statusText='En preparación';}
+        else {status='partial';statusText='Despachado parcial';}
+        trips.push({id:`${ps}|${Math.floor(i/10)+1}`,ps,number:Math.floor(i/10)+1,items:batch,currentCount,sentCount,total:batch.length,quantity:batch.reduce((sum,x)=>sum+(Number(x.boxes)||0),0),units:batch.reduce((sum,x)=>sum+(x.units===null?0:(Number(x.units)||0)),0),missingUnits:batch.filter(x=>x.units===null).length,status,statusText});
+      }
+    }
+    return trips;
+  }
+  function renderPS(){
+    const html=PS_LIST.map(ps=>{
+      const current=results.filter(x=>x.status==='ps'&&x.location===ps).length;
+      const trips=tripGroups.filter(t=>t.ps===ps), completed=trips.filter(t=>t.status==='done').length;
+      const active=trips.filter(t=>t.status!=='done').length;
+      const ready=current>=10;
+      const label=ready?'Listo para viaje':(current>0?'En preparación':'Disponible');
+      return `<div class="ps-card"><div class="ps-top"><div class="ps-name">${ps}</div><div class="ps-status ${ready?'ready':''}">${label}</div></div><div class="ps-count">${current}<span> / 10 paletas actuales</span></div><div class="progress"><i style="width:${Math.min(100,current*10)}%"></i></div><div class="ps-foot"><span>${completed} viaje(s) despachado(s)</span><span>${active} grupo(s) abierto(s)</span></div></div>`;
+    }).join('');
+    $('psGrid').innerHTML=html;
+  }
+  function renderTripGrid(){
+    const sorted=[...tripGroups].sort((a,b)=>PS_LIST.indexOf(a.ps)-PS_LIST.indexOf(b.ps)||a.number-b.number);
+    $('tripGrid').innerHTML=sorted.length?sorted.map(t=>`<div class="trip-card"><div class="trip-head"><div><div class="trip-title">${esc(t.ps)} · VIAJE ${t.number}</div><div class="trip-sub">${t.total} de 10 paletas · ${t.quantity.toLocaleString('es-PE')} cajas · ${t.units.toLocaleString('es-PE')} unidades</div></div><span class="trip-status ${t.status==='done'?'done':(t.status==='ready'?'ready':(t.status==='partial'?'partial':''))}">${esc(t.statusText)}</span></div><div class="trip-stats"><span>En PS: <strong>${t.currentCount}</strong></span><span>Despachadas: <strong>${t.sentCount}</strong></span><span>LPN: <strong>${t.total}</strong></span>${t.missingUnits?`<span>Sin saldo de unidades: <strong>${t.missingUnits}</strong></span>`:''}</div><div class="trip-actions"><span class="subcell">Excel: PS · LPN · Código · Cantidad · Unidades</span><button class="btn btn-light" data-trip-id="${esc(t.id)}">Descargar Excel</button></div></div>`).join(''):'<div class="trip-empty">Todavía no hay LPN con movimientos en A5.PS1–A5.PS5 o despachos confirmados. Al cargar movimientos, cada grupo aparecerá aquí.</div>';
+  }
+  function exportTrip(trip){
+    if(!trip||!window.XLSX){setError('No se pudo generar el Excel. Verifica la conexión y vuelve a intentarlo.');return;}
+    const rows=[['PS','LPN','Código','Cantidad','Unidades']];
+    trip.items.forEach(x=>rows.push([trip.ps,x.lpn,x.code,Number(x.boxes)||0,x.units===null?'':Number(x.units)]));
+    const ws=XLSX.utils.aoa_to_sheet(rows); ws['!cols']=[{wch:14},{wch:24},{wch:16},{wch:14},{wch:16}];
+    const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Viaje');
+    const safePS=trip.ps.replace(/[^A-Z0-9]+/gi,'_');
+    XLSX.writeFile(wb,`${safePS}_Viaje_${String(trip.number).padStart(2,'0')}.xlsx`);
+  }
+  function renderReabasto(){
+    if(!reabastoTrip || !reabastoTrip.items.length){
+      $('reabastoGrid').innerHTML='<div class="trip-empty">No se cargó el archivo opcional de reabasto o no hay registros en la hoja A5_A1.</div>';
+      return;
+    }
+    const t=reabastoTrip, origins=[...new Set(t.items.map(x=>x.origin).filter(Boolean))];
+    $('reabastoGrid').innerHTML=`<div class="trip-card"><div class="trip-head"><div><div class="trip-title">VIAJE REABASTO</div><div class="trip-sub">${t.items.length} SKU(s) · ${t.boxes.toLocaleString('es-PE')} cajas · ${t.units.toLocaleString('es-PE')} unidades</div></div><span class="trip-status ready">Adicional</span></div><div class="trip-stats"><span>Orígenes: <strong>${origins.length}</strong></span><span>Productos: <strong>${t.items.length}</strong></span><span>Unidades: <strong>${t.units.toLocaleString('es-PE')}</strong></span></div><div class="trip-actions"><span class="subcell">Excel: Origen · SKU · Cajas · Unidades</span><button class="btn btn-light" data-reabasto-export>Descargar Excel</button></div></div>`;
+  }
+  function exportReabasto(){
+    if(!reabastoTrip||!window.XLSX){setError('No se pudo generar el Excel de reabasto.');return;}
+    const rows=[['Tipo de viaje','Origen','LPN','Código / SKU','Descripción','Huella','Cantidad (Cajas)','Unidades','Unidades por caja','Unidades por paleta']];
+    reabastoTrip.items.forEach(x=>rows.push(['VIAJE REABASTO',x.origin,'',x.code,x.description,x.footprint,Number(x.boxes)||0,Number(x.units)||0,x.unitsPerBox||0,x.unitsPerPallet===null?'':x.unitsPerPallet]));
+    const ws=XLSX.utils.aoa_to_sheet(rows); ws['!cols']=[{wch:20},{wch:27},{wch:22},{wch:16},{wch:48},{wch:16},{wch:18},{wch:16},{wch:18},{wch:18}];
+    const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Viaje Reabasto');
+    XLSX.writeFile(wb,'VIAJE_REABASTO_A5_A1.xlsx');
+  }
+  function statusPill(item){
+    const cls={ps:'ps',sent:'sent',pending:'pending',other:'other',review:'review'}[item.status]||'other';
+    return `<span class="pill ${cls}">${item.statusText}</span>`;
+  }
+  function renderTable(){
+    const q=norm($('searchBox').value), st=$('statusFilter').value, ps=$('psFilter').value, size=$('pageSize').value;
+    filtered=results.filter(x=>{
+      const text=norm([x.lpn,x.code,x.description,x.origin,x.location].join(' '));
+      if(q&&!text.includes(q)) return false;
+      if(st!=='all'&&x.status!==st) return false;
+      if(ps!=='all'&&x.location!==ps) return false;
+      return true;
+    });
+    const shown=size==='all'?filtered:filtered.slice(0,Number(size));
+    $('tableBody').innerHTML=shown.length?shown.map(x=>`<tr><td><span class="lpn">${esc(x.lpn)}</span><span class="subcell">${x.events} movimiento(s) MI</span></td><td>${esc(x.code||'—')}<span class="subcell">${esc(x.description||'')}</span></td><td>${esc(x.origin||'—')}</td><td>${esc(x.location||'Sin ubicación MI')}</td><td>${x.units===null?'—':Number(x.units).toLocaleString('es-PE')}</td><td>${statusPill(x)}</td><td>${fmtDate(x.lastDate)}</td></tr>`).join(''):`<tr><td colspan="7" class="empty">No hay registros que coincidan con los filtros.</td></tr>`;
+    $('tableCount').textContent=`Mostrando ${shown.length} de ${filtered.length} registros filtrados (${results.length} en total)`;
+  }
+  function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function destroyChart(id){ if(charts[id]){charts[id].destroy();delete charts[id];} }
+  function makeChart(id,config){
+    if(!window.Chart) return;
+    destroyChart(id); charts[id]=new Chart($(id),config);
+  }
+  function renderCharts(){
+    if(!window.Chart){document.querySelectorAll('.chart-wrap').forEach(el=>{el.innerHTML='<div class="chart-fallback">No se pudo cargar la librería de gráficos. Verifica tu conexión a internet.</div>';});return;}
+    const currentByPS=PS_LIST.map(ps=>results.filter(x=>x.status==='ps'&&x.location===ps).length);
+    const statusDefs=[['En preparación','ps'],['Despachadas','sent'],['Pendientes','pending'],['Otra ubicación','other'],['Revisar','review']];
+    const statusCounts=statusDefs.map(([,key])=>results.filter(x=>x.status===key).length);
+    makeChart('chartPS',{type:'bar',data:{labels:PS_LIST,datasets:[{label:'Paletas actuales',data:currentByPS,backgroundColor:'#12a89a',borderRadius:7}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+    makeChart('chartStatus',{type:'doughnut',data:{labels:statusDefs.map(x=>x[0]),datasets:[{data:statusCounts,backgroundColor:['#12a89a','#17865b','#d69b35','#7b8794','#b54747'],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
+    const done=PS_LIST.map(ps=>tripGroups.filter(t=>t.ps===ps&&t.status==='done').length);
+    const inProgress=PS_LIST.map(ps=>tripGroups.filter(t=>t.ps===ps&&t.currentCount>0&&t.status!=='done').length);
+    const partial=PS_LIST.map(ps=>tripGroups.filter(t=>t.ps===ps&&t.currentCount===0&&t.status==='partial').length);
+    makeChart('chartTrips',{type:'bar',data:{labels:PS_LIST,datasets:[{label:'Despachados (10/10)',data:done,backgroundColor:'#17865b'},{label:'En preparación / proceso',data:inProgress,backgroundColor:'#12a89a'},{label:'Salida parcial',data:partial,backgroundColor:'#d69b35'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{precision:0}}}}});
+    const boxesByPS=PS_LIST.map(ps=>results.filter(x=>x.status==='ps'&&x.location===ps).reduce((sum,x)=>sum+(Number(x.boxes)||0),0));
+    makeChart('chartBoxes',{type:'bar',data:{labels:PS_LIST,datasets:[{label:'Cajas en preparación',data:boxesByPS,backgroundColor:'#4f83b8',borderRadius:7}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+    const unitsByPS=PS_LIST.map(ps=>results.filter(x=>x.status==='ps'&&x.location===ps&&x.units!==null).reduce((sum,x)=>sum+(Number(x.units)||0),0));
+    makeChart('chartUnits',{type:'bar',data:{labels:PS_LIST,datasets:[{label:'Unidades en preparación',data:unitsByPS,backgroundColor:'#12a89a',borderRadius:7}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+    const codeMap=new Map();
+    results.filter(x=>x.status==='ps').forEach(x=>{const code=x.code||'Sin código';codeMap.set(code,(codeMap.get(code)||0)+(Number(x.boxes)||0));});
+    const top=[...codeMap.entries()].sort((a,b)=>b[1]-a[1]).slice(0,10);
+    makeChart('chartTopCodes',{type:'bar',data:{labels:top.map(x=>x[0]),datasets:[{label:'Cajas',data:top.map(x=>x[1]),backgroundColor:'#4f83b8',borderRadius:6}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true}}}});
+    const reabastoBySku=new Map();
+    reabastoItems.forEach(x=>{const key=x.code||'Sin SKU';const old=reabastoBySku.get(key)||{boxes:0,units:0};old.boxes+=Number(x.boxes)||0;old.units+=Number(x.units)||0;reabastoBySku.set(key,old);});
+    const reabastoTop=[...reabastoBySku.entries()].sort((a,b)=>b[1].units-a[1].units).slice(0,10);
+    makeChart('chartReabastoBoxes',{type:'bar',data:{labels:reabastoTop.map(x=>x[0]),datasets:[{label:'Cajas de reabasto',data:reabastoTop.map(x=>x[1].boxes),backgroundColor:'#d69b35',borderRadius:6}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true}}}});
+    makeChart('chartReabastoUnits',{type:'bar',data:{labels:reabastoTop.map(x=>x[0]),datasets:[{label:'Unidades de reabasto',data:reabastoTop.map(x=>x[1].units),backgroundColor:'#17865b',borderRadius:6}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true}}}});
+  }
+  function render(){
+    const total=results.length, ps=results.filter(x=>x.status==='ps').length, sent=results.filter(x=>x.status==='sent').length, pending=results.filter(x=>x.status==='pending').length;
+    $('kTotal').textContent=total.toLocaleString('es-PE'); $('kPS').textContent=ps.toLocaleString('es-PE'); $('kSent').textContent=sent.toLocaleString('es-PE'); $('kPending').textContent=pending.toLocaleString('es-PE');
+    tripGroups=buildTrips(); $('dashboard').style.display='block'; renderPS(); renderTripGrid(); renderReabasto(); renderCharts(); renderTable();
+  }
+  async function process(){
+    setError('');
+    if(!window.XLSX){setError('No se pudo cargar la librería de lectura Excel. Verifica tu conexión a internet y vuelve a abrir la página.');return;}
+    if(!targetFile||!miFile||!saldoFile){setError('Debes seleccionar los tres archivos obligatorios: traslados, MI y saldo. El archivo de reabasto es opcional.');return;}
+    $('processBtn').disabled=true; $('loadStatus').textContent='Leyendo traslados, MI y saldo…';
+    try{
+      const [targetRows,miRows,saldoRows]=await Promise.all([readRows(targetFile),readRows(miFile),readRows(saldoFile)]);
+      const targets=parseTarget(targetRows), events=parseMI(miRows), saldoMap=parseSaldo(saldoRows);
+      if(reabastoFile){
+        $('loadStatus').textContent='Leyendo archivo opcional de reabasto…';
+        const reabastoData=await readReabastoRows(reabastoFile);
+        reabastoItems=parseReabasto(reabastoData.rows);
+        reabastoTrip=reabastoItems.length?{id:'REABASTO|1',items:reabastoItems,boxes:reabastoItems.reduce((sum,x)=>sum+(Number(x.boxes)||0),0),units:reabastoItems.reduce((sum,x)=>sum+(Number(x.units)||0),0)}:null;
+      }else{
+        reabastoItems=[];
+        reabastoTrip=null;
+      }
+      results=analyze(targets,events,saldoMap);
+      const matched=results.filter(x=>x.events>0).length, saldoMatched=results.filter(x=>x.units!==null).length;
+      const saldoMeta=saldoMap._meta||{};
+      render();
+      const reabastoStatus=reabastoFile?(reabastoItems.length+' SKU(s) en reabasto'):'sin archivo de reabasto (opcional)';
+      $('loadStatus').textContent=`Proceso terminado: ${targets.length} LPN; ${matched} con MI; ${saldoMatched} con unidades en saldo; ${events.length} movimientos; ${reabastoStatus}. Saldo detectado: LPN columna ${saldoMeta.lpnColumn||'—'} y unidades columna ${saldoMeta.unitsColumn||'—'} (${saldoMeta.unitsHeader||'—'}).`;
+    }catch(err){
+      setError(err?.message||'Ocurrió un error al procesar los archivos.');
+      $('loadStatus').textContent='No se pudo completar el proceso.';
+    }finally{
+      updateProcessButton();
+    }
+  }
+  function exportCSV(){
+    if(!filtered.length){setError('No hay filas para exportar con los filtros actuales.');return;}
+    const cols=['LPN','Codigo','Descripcion','Ubicacion original','Ubicacion vigente','Unidades','Estado','Ultimo movimiento','PS despacho'];
+    const lines=[cols,...filtered.map(x=>[x.lpn,x.code,x.description,x.origin,x.location,x.units===null?'':x.units,x.statusText,fmtDate(x.lastDate),x.dispatchPS])];
+    const csv='\uFEFF'+lines.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}), url=URL.createObjectURL(blob), a=document.createElement('a');
+    a.href=url;a.download='control_traslados_aldea1.csv';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  }
+  function updateProcessButton(){ $('processBtn').disabled=!(targetFile&&miFile&&saldoFile); }
+  $('targetFile').addEventListener('change',e=>{targetFile=e.target.files[0]||null;fileLabel('targetName',targetFile);updateProcessButton();setError('');});
+  $('miFile').addEventListener('change',e=>{miFile=e.target.files[0]||null;fileLabel('miName',miFile);updateProcessButton();setError('');});
+  $('saldoFile').addEventListener('change',e=>{saldoFile=e.target.files[0]||null;fileLabel('saldoName',saldoFile);updateProcessButton();setError('');});
+  $('reabastoFile').addEventListener('change',e=>{reabastoFile=e.target.files[0]||null;fileLabel('reabastoName',reabastoFile);updateProcessButton();setError('');});
+  $('processBtn').addEventListener('click',process);
+  $('resetBtn').addEventListener('click',()=>{targetFile=null;miFile=null;saldoFile=null;reabastoFile=null;results=[];filtered=[];tripGroups=[];reabastoItems=[];reabastoTrip=null;Object.keys(charts).forEach(destroyChart);['targetFile','miFile','saldoFile','reabastoFile'].forEach(id=>$(id).value='');fileLabel('targetName',null);fileLabel('miName',null);fileLabel('saldoName',null);fileLabel('reabastoName',null);$('processBtn').disabled=true;$('dashboard').style.display='none';$('loadStatus').textContent='Selecciona los tres archivos obligatorios: traslados, MI y saldo. El reabasto es opcional.';setError('');});
+  ['searchBox','statusFilter','psFilter','pageSize'].forEach(id=>$(id).addEventListener(id==='searchBox'?'input':'change',renderTable));
+  $('exportBtn').addEventListener('click',exportCSV);
+  $('tripGrid').addEventListener('click',e=>{const btn=e.target.closest('[data-trip-id]');if(!btn)return;const trip=tripGroups.find(t=>t.id===btn.dataset.tripId);exportTrip(trip);});
+  $('reabastoGrid').addEventListener('click',e=>{if(e.target.closest('[data-reabasto-export]'))exportReabasto();});
+})();
+</script>
+</body>
+</html>
